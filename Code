@@ -1,0 +1,118 @@
+#include <IRremote.h>
+
+#include <LiquidCrystal_I2C.h>
+
+#define RECV_PIN 11
+
+#define BTN_0 0xfd30cf
+#define BTN_1 0xFD08F7
+#define BTN_2 0xFD8877
+#define POWER 0xFD00FF
+
+LiquidCrystal_I2C lcd(32,16,2);
+
+
+IRrecv irrecv(RECV_PIN);
+
+decode_results results;
+
+void setup()
+{
+ lcd.init();
+ lcd.backlight();
+ lcd.setCursor(3,0);
+ lcd.print("bem vindo");
+  
+ Serial.begin(9600);
+ irrecv.enableIRIn();
+}
+void tem(int tempPin,int t){
+  pinMode(tempPin, INPUT);
+  t = analogRead(tempPin);
+ Serial.println(t);
+  if(t<50){
+ lcd.setCursor(1,0);
+ lcd.print("temperatura");
+ lcd.setCursor(0,1);
+ lcd.print("baixa");
+ delay(100);
+ lcd.clear();
+    }
+  if(t>150 && t< 200){
+ lcd.setCursor(1,0);
+ lcd.print("temperatura");
+ lcd.setCursor(0,1);
+ lcd.print("media");
+ delay(100);
+ lcd.clear();
+}
+  if(t>280){
+ lcd.setCursor(1,0);
+ lcd.print("temperatura");
+ lcd.setCursor(0,1);
+ lcd.print("alta");
+ delay(100);
+ lcd.clear();
+}
+}
+void gas(int gasPin, int g){
+  pinMode(gasPin, INPUT);
+  g = analogRead(gasPin);
+ Serial.println(g);
+  if(g<90){
+ lcd.setCursor(1,0);
+ lcd.print("Nivel de gas");
+ lcd.setCursor(0,1);
+ lcd.print("baixo");
+ delay(100);
+ lcd.clear();
+    }
+  if(g>150 && g< 200){
+ lcd.setCursor(1,0);
+ lcd.print("Nivel de gas");
+ lcd.setCursor(0,1);
+ lcd.print("medio");
+ delay(100);
+ lcd.clear();
+}
+  if(g>280){
+ lcd.setCursor(1,0);
+ lcd.print("Nivel de gas");
+ lcd.setCursor(0,1);
+ lcd.print("alto");
+ delay(100);
+ lcd.clear();
+}
+}  
+void loop()
+{
+  if (irrecv.decode(&results)) {
+    Serial.println(results.value, HEX);
+    irrecv.resume();
+  }
+  if(results.value != 0xFFFFFFFF){
+    switch(results.value){
+      case BTN_0:
+      gas(A0,0);
+      tem(A1,0);
+    
+      break;
+      case BTN_1:
+        tem(A1,0);
+      break;
+      case BTN_2:
+      gas(A0,0);
+       
+      break;
+      case POWER:
+       lcd.init();
+      lcd.backlight();
+      lcd.setCursor(1,0);
+      lcd.print("aperte um botao");
+      delay(1000);
+      lcd.clear();
+      break;
+    }
+}
+  }
+  
